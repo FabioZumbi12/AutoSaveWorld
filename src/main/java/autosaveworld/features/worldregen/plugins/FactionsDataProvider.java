@@ -19,10 +19,12 @@ package autosaveworld.features.worldregen.plugins;
 
 import org.bukkit.World;
 
-import com.massivecraft.factions.entity.BoardColl;
-import com.massivecraft.factions.entity.Faction;
-import com.massivecraft.factions.entity.FactionColl;
-import com.massivecraft.massivecore.ps.PS;
+import java.util.Set;
+
+import com.massivecraft.factions.Board;
+import com.massivecraft.factions.FLocation;
+import com.massivecraft.factions.Faction;
+import com.massivecraft.factions.Factions;
 
 public class FactionsDataProvider extends DataProvider {
 
@@ -32,10 +34,19 @@ public class FactionsDataProvider extends DataProvider {
 
 	@Override
 	protected void init() throws Throwable {
-		for (final Faction f : FactionColl.get().getAll()) {
-			for (PS ps : BoardColl.get().getChunks(f)) {
-				if (ps.getWorld().equalsIgnoreCase(world.getName())) {
-					addChunkAtCoord(ps.getChunkX(), ps.getChunkZ());
+		Board board = Board.getInstance();
+		if (board == null) {
+			return;
+		}
+		for (final Faction f : Factions.getInstance().getAllFactions()) {
+			Set<FLocation> claims = board.getAllClaims(f);
+			if (claims == null) {
+				continue;
+			}
+			for (FLocation floc : claims) {
+				String worldName = floc.getWorldName();
+				if (worldName != null && worldName.equalsIgnoreCase(world.getName())) {
+					addChunkAtCoord(floc.getIntX(), floc.getIntZ());
 				}
 			}
 		}

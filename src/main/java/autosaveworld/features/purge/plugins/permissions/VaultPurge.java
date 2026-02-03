@@ -34,7 +34,13 @@ public class VaultPurge extends DataPurge {
 	}
 
 	public void doPurge() {
+		if (Bukkit.getServicesManager().getRegistration(Permission.class) == null) {
+			return;
+		}
 		final Permission permission = Bukkit.getServicesManager().getRegistration(Permission.class).getProvider();
+		if (permission == null) {
+			return;
+		}
 
 		try (TaskExecutor queue = new TaskExecutor(80)) {
 			for (final OfflinePlayer player : activeplayerslist.getAllPlayers()) {

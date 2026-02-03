@@ -20,7 +20,7 @@ package autosaveworld.features.worldregen.plugins;
 import org.bukkit.World;
 
 import net.sacredlabyrinth.Phaed.PreciousStones.PreciousStones;
-import net.sacredlabyrinth.Phaed.PreciousStones.vectors.Field;
+import net.sacredlabyrinth.Phaed.PreciousStones.field.Field;
 
 public class PStonesDataProvider extends DataProvider {
 
@@ -30,7 +30,11 @@ public class PStonesDataProvider extends DataProvider {
 
 	@Override
 	protected void init() throws Throwable {
-		for (Field field : PreciousStones.getInstance().getForceFieldManager().getFields("*", world)) {
+		PreciousStones preciousStones = PreciousStones.getInstance();
+		if (preciousStones == null || preciousStones.getForceFieldManager() == null) {
+			return;
+		}
+		for (Field field : preciousStones.getForceFieldManager().getFields("*", world)) {
 			addChunksInBounds(field.getMinx(), field.getMinz(), field.getMaxx(), field.getMaxz());
 		}
 	}

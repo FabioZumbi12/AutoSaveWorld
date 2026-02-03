@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URLClassLoader;
+import java.io.Closeable;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -53,33 +54,40 @@ public class InternalUtils {
 			if (thread.getClass().getClassLoader() == pluginClassLoader) {
 				thread.interrupt();
 				thread.join(2000);
-				if (thread.isAlive()) {
-					thread.stop();
-				}
 			}
 		}
 		// remove from plugins field
-		((List<Plugin>) ReflectionUtils.getField(managerclass, "plugins").get(pluginmanager)).remove(plugin);
+		Field pluginsField = getField(managerclass, "plugins");
+		if (pluginsField != null) {
+			((List<Plugin>) pluginsField.get(pluginmanager)).remove(plugin);
+		}
 		// remove from lookupnames field
-		((Map<String, Plugin>) ReflectionUtils.getField(managerclass, "lookupNames").get(pluginmanager)).values().remove(plugin);
+		Field lookupNamesField = getField(managerclass, "lookupNames");
+		if (lookupNamesField != null) {
+			((Map<String, Plugin>) lookupNamesField.get(pluginmanager)).values().remove(plugin);
+		}
 		// remove from commands field
-		CommandMap commandMap = (CommandMap) ReflectionUtils.getField(managerclass, "commandMap").get(pluginmanager);
-		Collection<Command> commands = (Collection<Command>) ReflectionUtils.getMethod(commandMap.getClass(), "getCommands", 0).invoke(commandMap);
-		for (Command cmd : new LinkedList<Command>(commands)) {
-			if (cmd instanceof PluginIdentifiableCommand) {
-				PluginIdentifiableCommand plugincommand = (PluginIdentifiableCommand) cmd;
-				if (plugincommand.getPlugin().getName().equalsIgnoreCase(plugin.getName())) {
-					removeCommand(commandMap, commands, cmd);
+		Field commandMapField = getField(managerclass, "commandMap");
+		if (commandMapField != null) {
+			CommandMap commandMap = (CommandMap) commandMapField.get(pluginmanager);
+			Collection<Command> commands = getCommands(commandMap);
+			if (commands != null) {
+				for (Command cmd : new LinkedList<Command>(commands)) {
+					if (cmd instanceof PluginIdentifiableCommand) {
+						PluginIdentifiableCommand plugincommand = (PluginIdentifiableCommand) cmd;
+						if (plugincommand.getPlugin().getName().equalsIgnoreCase(plugin.getName())) {
+							removeCommand(commandMap, commands, cmd);
+						}
+					} else if (cmd.getClass().getClassLoader() == pluginClassLoader) {
+						removeCommand(commandMap, commands, cmd);
+					}
 				}
-			} else if (cmd.getClass().getClassLoader() == pluginClassLoader) {
-				removeCommand(commandMap, commands, cmd);
+			} else {
+				removeKnownCommands(commandMap, plugin, pluginClassLoader);
 			}
 		}
 		// close file in url classloader
-		if (pluginClassLoader instanceof URLClassLoader) {
-			URLClassLoader urlloader = (URLClassLoader) pluginClassLoader;
-			urlloader.close();
-		}
+		closeClassLoader(pluginClassLoader);
 	}
 
 	private void removeCommand(CommandMap commandMap, Collection<Command> commands, Command cmd) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
@@ -102,6 +110,72 @@ public class InternalUtils {
 		// enable plugin
 		plugin.onLoad();
 		pluginmanager.enablePlugin(plugin);
+	}
+
+	private Field getField(Class<?> type, String name) {
+		try {
+			Field field = ReflectionUtils.getField(type, name);
+			if (field != null) {
+				field.setAccessible(true);
+			}
+			return field;
+		} catch (Throwable ignored) {
+			return null;
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private Collection<Command> getCommands(CommandMap commandMap) {
+		try {
+			Object result = ReflectionUtils.getMethod(commandMap.getClass(), "getCommands", 0).invoke(commandMap);
+			if (result instanceof Collection) {
+				return (Collection<Command>) result;
+			}
+		} catch (Throwable ignored) {
+		}
+		return null;
+	}
+
+	@SuppressWarnings("unchecked")
+	private void removeKnownCommands(CommandMap commandMap, Plugin plugin, ClassLoader pluginClassLoader) {
+		try {
+			Field knownCommandsField = getField(commandMap.getClass(), "knownCommands");
+			if (knownCommandsField == null) {
+				return;
+			}
+			Object raw = knownCommandsField.get(commandMap);
+			if (!(raw instanceof Map)) {
+				return;
+			}
+			Map<String, Command> knownCommands = (Map<String, Command>) raw;
+			for (String key : new LinkedList<String>(knownCommands.keySet())) {
+				Command cmd = knownCommands.get(key);
+				if (cmd == null) {
+					continue;
+				}
+				if (cmd instanceof PluginIdentifiableCommand) {
+					PluginIdentifiableCommand plugincommand = (PluginIdentifiableCommand) cmd;
+					if (plugincommand.getPlugin().getName().equalsIgnoreCase(plugin.getName())) {
+						cmd.unregister(commandMap);
+						knownCommands.remove(key);
+					}
+				} else if (cmd.getClass().getClassLoader() == pluginClassLoader) {
+					cmd.unregister(commandMap);
+					knownCommands.remove(key);
+				}
+			}
+		} catch (Throwable ignored) {
+		}
+	}
+
+	private void closeClassLoader(ClassLoader pluginClassLoader) throws IOException {
+		if (pluginClassLoader instanceof URLClassLoader) {
+			((URLClassLoader) pluginClassLoader).close();
+			return;
+		}
+		if (pluginClassLoader instanceof Closeable) {
+			((Closeable) pluginClassLoader).close();
+		}
 	}
 
 }

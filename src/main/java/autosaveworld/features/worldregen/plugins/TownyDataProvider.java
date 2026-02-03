@@ -22,7 +22,7 @@ import org.bukkit.World;
 import com.palmergames.bukkit.towny.exceptions.NotRegisteredException;
 import com.palmergames.bukkit.towny.object.Town;
 import com.palmergames.bukkit.towny.object.TownBlock;
-import com.palmergames.bukkit.towny.object.TownyUniverse;
+import com.palmergames.bukkit.towny.TownyUniverse;
 
 public class TownyDataProvider extends DataProvider {
 
@@ -32,7 +32,10 @@ public class TownyDataProvider extends DataProvider {
 
 	@Override
 	protected void init() throws NotRegisteredException {
-		for (Town town : TownyUniverse.getDataSource().getWorld(world.getName()).getTowns()) {
+		for (Town town : TownyUniverse.getInstance().getTowns()) {
+			if (town.getWorld() == null || !town.getWorld().getName().equalsIgnoreCase(world.getName())) {
+				continue;
+			}
 			for (TownBlock tb : town.getTownBlocks()) {
 				if (tb.getWorld().getName().equalsIgnoreCase(world.getName())) {
 					addChunkAtCoord(tb.getX(), tb.getZ());

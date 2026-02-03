@@ -25,9 +25,6 @@ import autosaveworld.features.purge.DataPurge;
 public class PermissionsPurge {
 
 	public static DataPurge selectDataPurge(ActivePlayersList activeplayerslist) {
-		if (Bukkit.getPluginManager().getPlugin("GroupManager") != null) {
-			return new GroupManagerPurge(activeplayerslist);
-		}
 		if (Bukkit.getPluginManager().getPlugin("Vault") != null) {
 			return new VaultPurge(activeplayerslist);
 		}

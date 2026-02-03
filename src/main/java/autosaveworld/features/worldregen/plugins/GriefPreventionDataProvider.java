@@ -31,7 +31,11 @@ public class GriefPreventionDataProvider extends DataProvider {
 
 	@Override
 	protected void init() throws Throwable {
-		for (Claim claim : ((GriefPrevention) Bukkit.getPluginManager().getPlugin("GriefPrevention")).dataStore.getClaims()) {
+		GriefPrevention gp = (GriefPrevention) Bukkit.getPluginManager().getPlugin("GriefPrevention");
+		if (gp == null || gp.dataStore == null) {
+			return;
+		}
+		for (Claim claim : gp.dataStore.getClaims()) {
 			addChunksInBounds(
 				claim.getLesserBoundaryCorner().getBlockX(),
 				claim.getLesserBoundaryCorner().getBlockZ(),
