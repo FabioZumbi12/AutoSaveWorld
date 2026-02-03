@@ -1,9 +1,20 @@
-# Build Folders #
+# Build outputs
 bin/
 build/
 target/
+
+# IDE files
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
 .externalToolBuilders/
- # Eclipse Files #
+.settings/
 *.project
 *.classpath
 *.prefs
+
+# OS files
+.DS_Store
+Thumbs.db
