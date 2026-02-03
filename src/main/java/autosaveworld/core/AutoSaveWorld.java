@@ -57,7 +57,7 @@ public class AutoSaveWorld extends JavaPlugin {
 
 	public AutoSaveWorld() {
 		if (!Bukkit.isPrimaryThread()) {
-			throw new IllegalStateException("Init not fom main thread");
+			throw new IllegalStateException("Init not from main thread");
 		}
 		if (instance != null) {
 			MessageLogger.warn("Instance wasn't null when enabling, this is not a good sign");
@@ -115,6 +115,7 @@ public class AutoSaveWorld extends JavaPlugin {
 		ConfigLoader.loadAndSave(config);
 		ConfigLoader.loadAndSave(configmsg);
 		preloadClasses();
+		logHookStatus();
 		try {
 			CommandsHandler commandshandler = new CommandsHandler();
 			commandshandler.initSubCommandHandlers();
@@ -144,6 +145,31 @@ public class AutoSaveWorld extends JavaPlugin {
 		FileUtils.init();
 		StringUtils.init();
 		RestartWaiter.init();
+	}
+
+	private void logHookStatus() {
+		String[] plugins = new String[] {
+			"WorldGuard",
+			"WorldEdit",
+			"Factions",
+			"GriefPrevention",
+			"Towny",
+			"PreciousStones",
+			"RedProtect",
+			"Essentials",
+			"Vault"
+		};
+		StringBuilder sb = new StringBuilder("Hook status: ");
+		boolean first = true;
+		for (String name : plugins) {
+			if (!first) {
+				sb.append(", ");
+			}
+			first = false;
+			boolean enabled = Bukkit.getPluginManager().getPlugin(name) != null && Bukkit.getPluginManager().getPlugin(name).isEnabled();
+			sb.append(name).append("=").append(enabled ? "OK" : "missing");
+		}
+		getLogger().info(sb.toString());
 	}
 
 	@Override
