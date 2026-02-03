@@ -199,16 +199,10 @@ public class AutoSaveWorldConfig implements Config {
 	public boolean purgeWGRegenRg = false;
 	@ConfigOption(path = "purge.wg.noregenoverlapregion")
 	public boolean purgeWGNoregenOverlap = true;
-	@ConfigOption(path = "purge.lwc.enabled")
-	public boolean purgeLWC = true;
-	@ConfigOption(path = "purge.lwc.deletepurgedblocks")
-	public boolean purgeLWCDelProtectedBlocks = false;
 	@ConfigOption(path = "purge.permissions.enabled")
 	public boolean purgePerms = true;
 	@ConfigOption(path = "purge.permissions.savecmd")
 	public String purgePermsSaveCMD = "mansave force";
-	@ConfigOption(path = "purge.mywarp.enabled")
-	public boolean purgeMyWarp = true;
 	@ConfigOption(path = "purge.essentials.enabled")
 	public boolean purgeEssentials = true;
 	@ConfigOption(path = "purge.dat.enabled")
@@ -264,6 +258,8 @@ public class AutoSaveWorldConfig implements Config {
 	public boolean worldregenSaveTowny = true;
 	@ConfigOption(path = "worldregen.savepstones")
 	public boolean worldregenSavePStones = true;
+	@ConfigOption(path = "worldregen.saveredprotect")
+	public boolean worldregenSaveRedProtect = true;
 	// network watcher
 	@ConfigOption(path = "networkwatcher.mainthreadnetaccess.warn")
 	public boolean networkWatcherWarnMainThreadAcc = true;

@@ -33,6 +33,7 @@ import autosaveworld.features.worldregen.plugins.DataProvider;
 import autosaveworld.features.worldregen.plugins.FactionsDataProvider;
 import autosaveworld.features.worldregen.plugins.GriefPreventionDataProvider;
 import autosaveworld.features.worldregen.plugins.PStonesDataProvider;
+import autosaveworld.features.worldregen.plugins.RedProtectDataProvider;
 import autosaveworld.features.worldregen.plugins.TownyDataProvider;
 import autosaveworld.features.worldregen.plugins.WorldGuardDataProvider;
 import autosaveworld.features.worldregen.storage.AnvilRegion;
@@ -95,6 +96,10 @@ public class WorldRegenThread extends Thread {
 			if ((Bukkit.getPluginManager().getPlugin("PreciousStones") != null) && config.worldregenSavePStones) {
 				MessageLogger.debug("PreciousStones found, adding to copy list");
 				providers.add(new PStonesDataProvider(wtoregen));
+			}
+			if ((Bukkit.getPluginManager().getPlugin("RedProtect") != null) && config.worldregenSaveRedProtect) {
+				MessageLogger.debug("RedProtect found, adding to copy list");
+				providers.add(new RedProtectDataProvider(wtoregen));
 			}
 		} catch (Throwable t) {
 			MessageLogger.exception("Failed to initialize preserve chunk list", t);
