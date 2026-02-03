@@ -2,6 +2,7 @@ name: AutoSaveWorld
 main: autosaveworld.core.AutoSaveWorld
 version: 4.15
 author: _Shevchik_
+authors: [ ChanceSD, FabioZumbi12 ]
 load: STARTUP
 commands:
   autosaveworld:
