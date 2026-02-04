@@ -1,3 +1,8 @@
+# This workflow runs when a new tag starting with 'v' is pushed.
+# It builds the plugin with the tag version, creates a GitHub Release, and uploads the final JAR.
+#  For buils on github, push tags:
+#  - git tag v1.0.0
+#  - git push origin --tags
 name: Build
 
 on:
